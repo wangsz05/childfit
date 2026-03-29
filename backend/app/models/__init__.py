@@ -8,6 +8,7 @@ from app.models.daily_plan import DailyPlan
 from app.models.checkin import CheckIn
 from app.models.achievement import Achievement
 from app.models.schedule import Schedule
+from app.models.school import School, Class
 
 __all__ = [
     "User",
@@ -17,4 +18,6 @@ __all__ = [
     "CheckIn",
     "Achievement",
     "Schedule",
+    "School",
+    "Class",
 ]

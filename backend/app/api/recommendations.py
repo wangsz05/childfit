@@ -40,11 +40,10 @@ async def generate_recommendation(
             detail="孩子档案不存在",
         )
     
-    # 获取天气数据
+    # 获取天气数据 (使用默认城市)
     weather_data = None
-    if child.city:
-        weather_service = WeatherService()
-        weather_data = await weather_service.get_weather(child.city)
+    weather_service = WeatherService()
+    weather_data = await weather_service.get_weather(None)  # 使用默认城市
     
     # 使用计划日期或今天
     plan_date = request.plan_date or date.today()

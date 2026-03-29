@@ -28,9 +28,10 @@ class Settings(BaseSettings):
     # CORS 配置
     ALLOWED_ORIGINS: List[str] = ["*"]
     
-    # 天气 API 配置
-    HEFENG_API_KEY: str = ""
-    HEFENG_BASE_URL: str = "https://devapi.qweather.com/v7"
+    # 天气 API 配置 (WeatherCN)
+    WEATHER_API_KEY: str = "0LaQKA2AUmvSUuLO3B1Kj5dJiJiINPPS"
+    WEATHER_BASE_URL: str = "https://openapi.weathercn.com"
+    WEATHER_DEFAULT_CITY: str = "南京"
     
     # 存储配置
     COS_BUCKET: str = ""

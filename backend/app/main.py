@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import engine, Base
-from app.api import users, children, weather, recommendations, checkins, achievements, schedules
+from app.api import users, children, weather, recommendations, checkins, achievements, schedules, schools
 
 # 配置日志
 LOG_DIR = Path(__file__).parent.parent / "logs"
@@ -52,6 +52,7 @@ app.include_router(recommendations.router, prefix="/api/recommendations", tags=[
 app.include_router(checkins.router, prefix="/api/checkins", tags=["打卡记录"])
 app.include_router(achievements.router, prefix="/api/achievements", tags=["成就系统"])
 app.include_router(schedules.router, prefix="/api", tags=["作息时间表"])
+app.include_router(schools.router, tags=["学校管理"])
 
 
 @app.on_event("startup")

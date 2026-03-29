@@ -14,7 +14,7 @@ from app.models.daily_plan import DailyPlan
 from app.models.child_profile import ChildProfile
 from app.models.schedule import Schedule
 from app.schemas.daily_plan import PlanRecommendation
-from app.utils.age_calculator import calculate_age, get_age_group
+from app.utils.age_calculator import calculate_age, get_age_group, estimate_age_from_grade
 from app.utils.weather_rules import (
     WeatherCondition,
     is_outdoor_suitable,
@@ -98,8 +98,8 @@ class RecommendationService:
         Returns:
             推荐列表
         """
-        # 计算年龄
-        age = calculate_age(child.birth_date)
+        # 计算年龄 (根据年级估算)
+        age = estimate_age_from_grade(child.grade)
         age_group = get_age_group(age)
         
         recommendations = []
@@ -175,8 +175,8 @@ class RecommendationService:
         if not child:
             raise ValueError(f"孩子档案不存在：{child_id}")
         
-        # 计算年龄
-        age = calculate_age(child.birth_date)
+        # 计算年龄 (根据年级估算)
+        age = estimate_age_from_grade(child.grade)
         
         # 解析天气
         weather_condition = None
@@ -201,7 +201,6 @@ class RecommendationService:
         plan_data = {
             "date": plan_date.isoformat(),
             "child_id": child_id,
-            "child_name": child.name,
             "age": age,
             "weather": {
                 "text": weather.get("now", {}).get("text", "未知") if weather else "未知",

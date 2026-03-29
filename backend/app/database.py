@@ -7,12 +7,20 @@ from sqlalchemy.orm import sessionmaker
 from app.config import settings
 
 # 创建数据库引擎
-engine = create_engine(
-    settings.DATABASE_URL,
-    pool_pre_ping=True,
-    pool_recycle=3600,
-    echo=settings.DEBUG,
-)
+# SQLite 需要特殊配置 check_same_thread
+if settings.DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        settings.DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=settings.DEBUG,
+    )
+else:
+    engine = create_engine(
+        settings.DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        echo=settings.DEBUG,
+    )
 
 # 创建 SessionLocal
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

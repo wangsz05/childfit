@@ -43,25 +43,28 @@ class UserService:
     def create_user(self, user_data: UserCreate) -> User:
         """
         创建新用户
-        
+
         Args:
             user_data: 用户创建数据
-            
+
         Returns:
             创建的用户对象
         """
         user = User(
             id=str(uuid.uuid4()),
             wx_openid=user_data.wx_openid,
+            role=user_data.role or "student",
             phone=user_data.phone,
             nickname=user_data.nickname,
             avatar_url=user_data.avatar_url,
+            school_id=user_data.school_id,
+            class_id=user_data.class_id,
         )
-        
+
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
-        
+
         return user
     
     def update_user(self, user_id: str, user_data: UserUpdate) -> Optional[User]:

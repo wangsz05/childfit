@@ -91,15 +91,45 @@ def is_age_appropriate(age: int, age_min: int, age_max: int) -> bool:
 def calculate_age_and_group(birth_date: date) -> Tuple[int, str, str]:
     """
     计算年龄和年龄段
-    
+
     Args:
         birth_date: 出生日期
-        
+
     Returns:
         (年龄，年龄段标识，年龄段名称)
     """
     age = calculate_age(birth_date)
     age_group = get_age_group(age)
     age_group_name = get_age_group_name(age_group)
-    
+
     return age, age_group, age_group_name
+
+
+def estimate_age_from_grade(grade: str) -> int:
+    """
+    根据年级估算年龄
+
+    Args:
+        grade: 年级标识
+
+    Returns:
+        估算的年龄
+    """
+    grade_age_map = {
+        "kindergarten_small": 3,   # 小班
+        "kindergarten_middle": 4,  # 中班
+        "kindergarten_big": 5,     # 大班
+        "grade_1": 6,
+        "grade_2": 7,
+        "grade_3": 8,
+        "grade_4": 9,
+        "grade_5": 10,
+        "grade_6": 11,
+        "grade_7": 12,  # 初一
+        "grade_8": 13,  # 初二
+        "grade_9": 14,  # 初三
+        "grade_10": 15, # 高一
+        "grade_11": 16, # 高二
+        "grade_12": 17, # 高三
+    }
+    return grade_age_map.get(grade, 8)  # 默认 8 岁

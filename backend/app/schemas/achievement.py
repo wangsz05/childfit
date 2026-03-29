@@ -38,4 +38,4 @@ class AchievementType(BaseModel):
     name: str
     description: str
     icon: str
-    condition: Dict[str, Any]
+    condition: Optional[Dict[str, Any]] = None
