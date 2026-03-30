@@ -1,156 +1,112 @@
-# 📤 推送到 GitHub 仓库
+# 推送代码到远程仓库
 
-**目标仓库**: https://github.com/wangsz05/childfit
+## 当前状态
 
----
+本地代码已完成重构，包含 2 个新提交：
 
-## ✅ 已完成
-
-- [x] Git 仓库已初始化
-- [x] 远程仓库已配置：`https://github.com/wangsz05/childfit.git`
-- [x] 所有文件已提交 (17 个文件，4 次提交)
-
----
-
-## ⏳ 待完成：推送到 GitHub
-
-### 方式一：使用 Personal Access Token (推荐)
-
-#### 第 1 步：获取 Token
-
-1. 访问 https://github.com/settings/tokens
-2. 点击 **Generate new token (classic)**
-3. 填写 Note: `ChildFit Push`
-4. 选择权限：✅ `repo` (全选)
-5. 点击 **Generate token**
-6. **复制 Token** (只显示一次，保存好!)
-
-#### 第 2 步：执行推送
-
-```bash
-cd /root/.openclaw/workspace/projects/child-health-system
-
-# 推送 (会提示输入用户名和密码)
-git push -u origin main
-
-# Username: wangsz05
-# Password: 粘贴刚才复制的 Token
+```
+6fc6e3a docs: 添加前端重构报告
+a81ddbd feat: 重构前端为 Vue 3 + Vite 实现
 ```
 
----
+## 推送方法
 
-### 方式二：使用 SSH (如已配置 SSH 密钥)
-
-#### 第 1 步：切换到 SSH 方式
+### 方法 1: 使用 HTTPS (推荐)
 
 ```bash
-cd /root/.openclaw/workspace/projects/child-health-system
+cd /root/.openclaw/workspace/childfit-repo
 
-# 修改远程 URL 为 SSH
+# 配置 Git 用户信息 (首次使用)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# 推送到远程仓库
+git push origin main
+```
+
+系统会提示输入 GitHub 用户名和密码 (或个人访问 token)。
+
+### 方法 2: 使用 SSH
+
+如果已配置 SSH key:
+
+```bash
+# 更改远程仓库为 SSH 地址
 git remote set-url origin git@github.com:wangsz05/childfit.git
 
 # 推送
-git push -u origin main
+git push origin main
 ```
 
----
+### 方法 3: 使用 Personal Access Token
 
-### 方式三：在 GitHub 网站操作
+1. 在 GitHub 生成 Personal Access Token:
+   - 访问 https://github.com/settings/tokens
+   - 生成新 token (勾选 repo 权限)
+   - 复制 token
 
-1. 访问 https://github.com/wangsz05
-2. 点击 **New repository** 或 **Create repository**
-3. 填写:
-   - **Repository name**: `childfit`
-   - **Description**: `看天安排孩子运动的公益 App`
-   - **Visibility**: ✅ Public
-   - ❌ **不要勾选** "Initialize this repository with a README"
-4. 点击 **Create repository**
-5. 在页面中找到 "**…or push an existing repository from the command line**"
-6. 复制命令并执行:
-   ```bash
-   git remote add origin https://github.com/wangsz05/childfit.git
-   git branch -M main
-   git push -u origin main
-   ```
-   (远程已配置，直接执行后两行即可)
-
----
-
-## 🔍 验证推送
-
-推送成功后，访问:
-```
-https://github.com/wangsz05/childfit
-```
-
-确认文件已上传:
-- ✅ README.md
-- ✅ PROJECT_PLAN.md
-- ✅ PRODUCT_DESIGN.md
-- ✅ TECHNICAL_ARCHITECTURE.md
-- ✅ CLIMATE_DIET_PLAN.md
-- ✅ 其他 12 份文档
-
----
-
-## 📋 推送后操作
-
-### 1. 添加 Topics
-
-在仓库页面，点击 ⚙️ 设置 Topics:
-```
-child-health, fitness, public-welfare, wechat-miniprogram, 公益，儿童健康，天气适配，开源项目
-```
-
-### 2. 完善 About
-
-在仓库首页右侧 About 区域添加:
-- 项目描述
-- 网站链接 (如有)
-
-### 3. 启用功能
-
-- ✅ Issues
-- ✅ Projects
-- ✅ Discussions (可选)
-
----
-
-## ⚠️ 常见问题
-
-### 提示 "could not read Username"
-原因：Git 无法交互式输入用户名
-
-解决：
+2. 推送时使用 token 作为密码:
 ```bash
-# 方法 1: 在 URL 中直接包含用户名 (不推荐，密码会暴露)
-git remote set-url origin https://wangsz05:TOKEN@github.com/wangsz05/childfit.git
-git push -u origin main
-
-# 方法 2: 使用 git credential 配置
-git config --global credential.helper store
-git push -u origin main
-# 第一次输入后，凭证会保存
+git push origin main
+# Username: your-github-username
+# Password: <paste-your-token>
 ```
 
-### 提示 "repository not found"
-- 确认仓库已创建
-- 确认用户名正确 (wangsz05)
-- 确认仓库可见性为 Public
+### 方法 4: 使用 Git Credential Helper
 
-### 提示需要密码
-使用 Personal Access Token，不是 GitHub 账号密码！
+```bash
+# 配置凭据缓存 (1 小时)
+git config --global credential.helper cache
+
+# 或配置凭据存储 (永久)
+git config --global credential.helper store
+
+# 推送
+git push origin main
+```
+
+## 验证推送
+
+推送成功后，访问 https://github.com/wangsz05/childfit 查看最新提交。
+
+## 前端部署
+
+### 开发环境
+```bash
+cd frontend
+npm install
+npm run dev
+# 访问 http://localhost:8082
+```
+
+### 生产环境
+```bash
+cd frontend
+npm install
+npm run build
+# 部署 dist/ 目录到服务器
+```
+
+## 后端启动
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## 完整测试流程
+
+1. 启动后端 (端口 8000)
+2. 启动前端 (端口 8082)
+3. 访问 http://localhost:8082
+4. 测试登录功能
+5. 测试孩子档案管理
+6. 测试天气展示
+7. 测试计划生成
+8. 测试打卡功能
+9. 测试成就系统
 
 ---
 
-## 📞 需要帮助？
-
-如推送遇到问题，请:
-1. 检查网络连接
-2. 确认 Token 权限正确
-3. 确认仓库已创建且为 Public
-
----
-
-*创建时间：2026-03-26*
-*目标仓库：https://github.com/wangsz05/childfit*
+**注意**: 推送需要 GitHub 仓库的写权限。如果没有权限，请联系仓库管理员。
