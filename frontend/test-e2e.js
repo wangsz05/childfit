@@ -1,146 +1,124 @@
-const puppeteer = require('puppeteer');
+import { test, expect } from '@playwright/test';
 
-async function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+test.describe('ChildFit E2E Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:8082');
+  });
 
-async function runTests() {
-  let browser;
-  try {
-    console.log('=== ChildFit E2E Test Suite ===\n');
+  test('should load login page', async ({ page }) => {
+    await expect(page).toHaveTitle(/ChildFit/);
+    await expect(page.locator('h1')).toContainText('ChildFit');
+  });
 
-    browser = await puppeteer.launch({
-      headless: false,
-      executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
-    });
+  test('should select role', async ({ page }) => {
+    const studentRole = page.locator('.role-option:first-child');
+    const teacherRole = page.locator('.role-option:last-child');
+    
+    await expect(studentRole).toBeVisible();
+    await expect(teacherRole).toBeVisible();
+    
+    await studentRole.click();
+    await expect(studentRole).toHaveClass(/active/);
+    
+    await teacherRole.click();
+    await expect(teacherRole).toHaveClass(/active/);
+  });
 
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 800 });
-
-    let testResults = [];
-
-    // ========== Test 1: Login Page ==========
-    console.log('Test 1: Login Page');
-    await page.goto('http://localhost:8082', { waitUntil: 'networkidle0', timeout: 15000 });
-    await delay(2000);
-    await page.screenshot({ path: '../test-results/01-login-page.png', fullPage: true });
-
-    // Verify role options
-    const roleOptions = await page.$$('.role-option');
-    testResults.push({
-      test: 'Login Page Role Options',
-      passed: roleOptions.length === 2,
-      detail: `Found ${roleOptions.length} role options`
-    });
-    console.log(`  Role options: ${roleOptions.length}\n`);
-
-    // ========== Test 2: Select Student Role ==========
-    console.log('Test 2: Select Student Role');
-    await page.click('.role-option:first-child');
-    await delay(1500);
-    await page.screenshot({ path: '../test-results/02-student-selected.png', fullPage: true });
-
-    const studentActive = await page.$eval('.role-option:first-child', el => el.classList.contains('active'));
-    testResults.push({
-      test: 'Student Role Selection',
-      passed: studentActive,
-      detail: studentActive ? 'Student option is active' : 'Student option not active'
-    });
-    console.log(`  Student selected: ${studentActive}\n`);
-
-    // ========== Test 3: Select Teacher Role ==========
-    console.log('Test 3: Select Teacher Role');
-    await page.click('.role-option:last-child');
-    await delay(1500);
-    await page.screenshot({ path: '../test-results/03-teacher-selected.png', fullPage: true });
-
-    const teacherActive = await page.$eval('.role-option:last-child', el => el.classList.contains('active'));
-    testResults.push({
-      test: 'Teacher Role Selection',
-      passed: teacherActive,
-      detail: teacherActive ? 'Teacher option is active' : 'Teacher option not active'
-    });
-    console.log(`  Teacher selected: ${teacherActive}\n`);
-
-    // ========== Test 4: Click Login Button ==========
-    console.log('Test 4: Click Login Button');
+  test('should login with valid credentials', async ({ page }) => {
+    await page.fill('input[placeholder*="OpenID"]', 'test123');
+    await page.fill('input[placeholder*="昵称"]', '测试用户');
+    
     await page.click('.btn-wechat');
-    await delay(5000);
-    await page.screenshot({ path: '../test-results/04-after-login.png', fullPage: true });
+    
+    // Should navigate to children page after login
+    await page.waitForURL(/\/children/);
+    await expect(page.locator('h1')).toContainText('孩子档案');
+  });
 
-    const currentUrl = page.url();
-    const loginSuccessful = currentUrl.includes('/pages/index/index') || currentUrl.includes('/pages/children') || currentUrl.includes('/pages/login');
-    testResults.push({
-      test: 'Login Navigation',
-      passed: loginSuccessful,
-      detail: `Current URL: ${currentUrl}`
+  test('should add a child profile', async ({ page }) => {
+    // Login first
+    await page.fill('input[placeholder*="OpenID"]', 'test123');
+    await page.fill('input[placeholder*="昵称"]', '测试用户');
+    await page.click('.btn-wechat');
+    await page.waitForURL(/\/children/);
+    
+    // Click add child button
+    await page.click('button:has-text("添加孩子")');
+    
+    // Fill child info
+    await page.fill('input[placeholder*="姓名"]', '小明');
+    await page.fill('input[type="date"]', '2020-01-01');
+    await page.selectOption('select', 'male');
+    await page.fill('input[placeholder*="城市"]', '北京');
+    
+    // Save
+    await page.click('button:has-text("保存")');
+    
+    // Should navigate to home page
+    await page.waitForURL(/\/home/);
+    await expect(page.locator('h1')).toContainText('首页');
+  });
+
+  test('should display weather card on home page', async ({ page }) => {
+    // Login and navigate to home
+    await page.fill('input[placeholder*="OpenID"]', 'test123');
+    await page.fill('input[placeholder*="昵称"]', '测试用户');
+    await page.click('.btn-wechat');
+    await page.waitForURL(/\/children/);
+    
+    // Wait for child selection or navigate directly
+    await page.goto('http://localhost:8082/home');
+    
+    // Check weather card
+    await expect(page.locator('.weather-card')).toBeVisible();
+  });
+
+  test('should navigate using tab bar', async ({ page }) => {
+    // Login first
+    await page.fill('input[placeholder*="OpenID"]', 'test123');
+    await page.fill('input[placeholder*="昵称"]', '测试用户');
+    await page.click('.btn-wechat');
+    await page.waitForURL(/\/children/);
+    await page.goto('http://localhost:8082/home');
+    
+    // Test tab navigation
+    const tabBarItems = page.locator('.tab-bar-item');
+    await expect(tabBarItems).toHaveCount(5);
+    
+    // Click Plan tab
+    await page.click('.tab-bar-item:has-text("计划")');
+    await page.waitForURL(/\/plan/);
+    
+    // Click CheckIn tab
+    await page.click('.tab-bar-item:has-text("打卡")');
+    await page.waitForURL(/\/checkin/);
+    
+    // Click Achievements tab
+    await page.click('.tab-bar-item:has-text("成就")');
+    await page.waitForURL(/\/achievements/);
+    
+    // Click Profile tab
+    await page.click('.tab-bar-item:has-text("我的")');
+    await page.waitForURL(/\/profile/);
+  });
+
+  test('should logout from profile page', async ({ page }) => {
+    // Login first
+    await page.fill('input[placeholder*="OpenID"]', 'test123');
+    await page.fill('input[placeholder*="昵称"]', '测试用户');
+    await page.click('.btn-wechat');
+    await page.waitForURL(/\/children/);
+    await page.goto('http://localhost:8082/profile');
+    
+    // Click logout
+    await page.click('button:has-text("退出登录")');
+    
+    // Should handle confirmation and redirect to login
+    page.on('dialog', async dialog => {
+      expect(dialog.type()).toBe('confirm');
+      await dialog.accept();
     });
-    console.log(`  Current URL: ${currentUrl}\n`);
-
-    // ========== Test 5: Check Home Page (if navigated) ==========
-    if (currentUrl.includes('/pages/index/index')) {
-      console.log('Test 5: Home Page Elements');
-      await delay(2000);
-
-      const tabBarItems = await page.$$('.tabbar-item');
-      testResults.push({
-        test: 'Home Page Tab Bar',
-        passed: tabBarItems.length > 0,
-        detail: `Found ${tabBarItems.length} tab bar items`
-      });
-      console.log(`  Tab bar items: ${tabBarItems.length}\n`);
-
-      await page.screenshot({ path: '../test-results/05-home-page.png', fullPage: true });
-    }
-
-    // ========== Test 6: API Health Check ==========
-    console.log('Test 6: Backend API Health Check');
-    const apiResponse = await page.evaluate(async () => {
-      try {
-        const res = await fetch('http://localhost:8000/api/health');
-        return await res.json();
-      } catch (e) {
-        return { error: e.message };
-      }
-    });
-
-    testResults.push({
-      test: 'Backend API Health',
-      passed: apiResponse.status === 'healthy',
-      detail: JSON.stringify(apiResponse)
-    });
-    console.log(`  API Response: ${JSON.stringify(apiResponse)}\n`);
-
-    // ========== Summary ==========
-    console.log('=== Test Summary ===\n');
-    const passed = testResults.filter(t => t.passed).length;
-    const total = testResults.length;
-
-    console.log(`Total: ${total} tests`);
-    console.log(`Passed: ${passed}`);
-    console.log(`Failed: ${total - passed}\n`);
-
-    testResults.forEach(test => {
-      const icon = test.passed ? '✓' : '✗';
-      console.log(`${icon} ${test.test}: ${test.detail}`);
-    });
-
-    // Save summary
-    await page.screenshot({ path: '../test-results/99-final-state.png', fullPage: true });
-
-    await browser.close();
-    console.log('\n=== All tests completed! ===');
-
-    // Exit with error if any test failed
-    process.exit(passed === total ? 0 : 1);
-
-  } catch (error) {
-    console.error('Fatal Error:', error.message);
-    console.error(error.stack);
-    if (browser) await browser.close();
-    process.exit(1);
-  }
-}
-
-runTests();
+    
+    await page.waitForURL(/\/login/);
+  });
+});
